@@ -52,13 +52,13 @@ def parse_link():
     tagaz_mod = ['aquila', 'vega', 'road_partner', 'c10', 'c190', 'c30', 'tagaz', 'tager']
 
     uaz_mod = ['3151', '3153', '3159', '469', 'buhanka', 'patriot', 'pick-up', 'simbir', 'hunter']
-
+    #
     # brands = [{'bogdan': bogdan_mod}, {'gaz': gaz_mod}, {'doninvest': doninvest_mod}, {'zaz': zaz_mod},
     #           {'izh': izh_mod}, {'luaz': luaz_mod}, {'moskvitch': moskvitch_mod}, {'raf': raf_mod},
     #           {'tagaz': tagaz_mod}, {'uaz': uaz_mod}]
 
-    brands = [{'uaz': uaz_mod}]
-
+    # brands = [{'uaz': uaz_mod}]
+    brands = [{'gaz': gaz_mod}]
 
     for brand in brands:
 
@@ -84,7 +84,8 @@ def parse_link():
                 cars_links = []
 
                 for links in soup.findAll('a'):
-                    pattern = r'https\:\/\/\S+\.drom\.ru\/\S+\/\S+\/[0-9]+\.html'
+                    # pattern = r'https\:\/\/\S+\.drom\.ru\/\S+\/\S+\/[0-9]+\.html'
+                    pattern = r'https\:\/\/\S+\.drom\.ru\/[^info]\S+\/\S+\/[0-9]+\.html'
                     m = re.search(pattern, links.get('href'))
 
                     if m:
@@ -94,7 +95,7 @@ def parse_link():
                     break
 
                 for url in cars_links:
-                    response = requests.get(url, headers=headers, proxies={'http': '80.48.119.28	8080'})
+                    response = requests.get(url, headers=headers, proxies={'http': '80.48.119.28:8080'})
                     soup = BS(response.content, 'html.parser')
                     print(url)
 
