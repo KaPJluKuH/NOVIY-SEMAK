@@ -9,22 +9,14 @@ def parse_link():
     comps = []
     Errors = 0
 
-    # base_url = f'https://auto.drom.ru/lada/2104/page1/'
-    # base_url = f'https://auto.drom.ru/gaz/31029_volga/page1/'
-    # base_url = f'https://auto.drom.ru/lada/vesta/page1/'
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36'
     }
 
     # ДАННЫЕ ДЛЯ СМЕНЫ ССЫЛОК
 
-    # brand = ['bogdan', 'gaz', 'doninvest', 'zaz', 'izh', 'luaz', 'moskvitch', 'raf', 'tagaz', 'uaz']
-
     bogdan_mod = ['2110', '2111', '2310']
 
-    gaz_mod = ['12_zim', '21_volga', '22_volga', '2217', '24_volga', '3102_volga', '31029_volga', '3110_volga',
-               '31105_volga', '3111_volga', '67', '69', 'volga_siber', 'gaz-13_chaika', 'gaz-14_chaika',
-               'gaz-2330_tigr', 'm1', 'pobeda']
 
     doninvest_mod = ['kondor']
 
@@ -53,12 +45,9 @@ def parse_link():
 
     uaz_mod = ['3151', '3153', '3159', '469', 'buhanka', 'patriot', 'pick-up', 'simbir', 'hunter']
     #
-    # brands = [{'bogdan': bogdan_mod}, {'gaz': gaz_mod}, {'doninvest': doninvest_mod}, {'zaz': zaz_mod},
-    #           {'izh': izh_mod}, {'luaz': luaz_mod}, {'moskvitch': moskvitch_mod}, {'raf': raf_mod},
-    #           {'tagaz': tagaz_mod}, {'uaz': uaz_mod}]
-
-    # brands = [{'uaz': uaz_mod}]
-    brands = [{'gaz': gaz_mod}]
+    brands = [{'bogdan': bogdan_mod}, {'gaz': gaz_mod}, {'lada': lada_mod}, {'doninvest': doninvest_mod}, {'zaz': zaz_mod},
+              {'izh': izh_mod}, {'luaz': luaz_mod}, {'moskvitch': moskvitch_mod}, {'raf': raf_mod},
+              {'tagaz': tagaz_mod}, {'uaz': uaz_mod}]
 
     for brand in brands:
 
@@ -70,7 +59,6 @@ def parse_link():
 
             while True:
 
-                # print(brand_name, model_name)
                 base_url = f'https://auto.drom.ru/{brand_name}/{model_name}/page{i}/'
                 i += 1
                 print(base_url)
@@ -138,7 +126,8 @@ def parse_link():
                         pattern = r'оценка модели<\/span>(.*)<\/div><\/div><\/div>'
                         mark_var_pat = re.match(pattern, str(zaglav))
                         if mark_var_pat:
-                            mark_var = float(re.search(r'оценка модели<\/span>(.*)<\/div><\/div><\/div>', str(zaglav)).group(1))
+                            mark_var = float(re.search(r'оценка модели<\/span>(.*)<\/div><\/div><\/div>',
+                                                       str(zaglav)).group(1))
 
                         # GEO
 
@@ -146,7 +135,8 @@ def parse_link():
                         for geos in geo:
                             if 'Город' in str(geos):
                                 # print(geos)
-                                geo_var = re.search(r'Город<!-- -->: <\/span>(.*)<\/div>', str(geos)).group(1).split(",")
+                                geo_var = re.search(r'Город<!-- -->: <\/span>(.*)<\/div>',
+                                                    str(geos)).group(1).split(",")
                                 geo_var_c = geo_var[0]
                                 geo_var_o = geo_var[1] if len(geo_var) > 1 else ''
 
@@ -252,8 +242,8 @@ def parse_link():
                             'car_mil': car_mil_var,
                             'steering_wheel': en_sw_var,
                             'generation': en_gen_var,
-                            'doc_pts': doc_reg_var,
-                            'doc_reg': doc_lim_var,
+                            'doc_pts': doc_pts_var,
+                            'doc_reg': doc_reg_var,
                             'doc_lim': doc_lim_var,
                             'doc_wanted': doc_want_var
                         })
