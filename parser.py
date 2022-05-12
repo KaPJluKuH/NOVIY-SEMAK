@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup as BS
 import DbContext
 import stem
 from random import choice
-# from proxy import
+from proxy import main_proxy
 
 def parse_link():
 
@@ -37,6 +37,7 @@ def parse_link():
     def random_headers():
         return {'User-Agent': choice(desktop_agents),
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'}
+
     # ДАННЫЕ ДЛЯ СМЕНЫ ССЫЛОК
 
     bogdan_mod = ['2110', '2111', '2310']
@@ -88,7 +89,7 @@ def parse_link():
                 print(base_url)
                 # РАБОТА ПАРСЕРА
 
-                response = requests.get(base_url, headers=random_headers(), timeout=10)
+                response = requests.get(base_url, headers=random_headers(), proxies=main_proxy(), timeout=10)
 
                 soup = BS(response.content, 'html.parser')
                 models = []
@@ -107,7 +108,7 @@ def parse_link():
                     break
 
                 for url in cars_links:
-                    response = requests.get(url, headers=random_headers(), timeout=10) # proxies={'http': '80.48.119.28:8080'}
+                    response = requests.get(url, headers=random_headers(), proxies=main_proxy(), timeout=10) # proxies={'http': '80.48.119.28:8080'}
                     soup = BS(response.content, 'html.parser')
                     print(url)
 
