@@ -18,7 +18,7 @@ def get_free_proxies():
             proxies.append(host)
         except IndexError:
             continue
-    print(proxies)
+    # print(proxies)
     return proxies
 
 
@@ -26,14 +26,14 @@ def main_proxy():
     free_proxies = get_free_proxies()
     my_proxy = choice(free_proxies)
     http_proxy = f"http://{my_proxy}"
-    https_proxy = f"https://{my_proxy}"
-    ftp_proxy = f"ftp://{my_proxy}"
+    # https_proxy = f"https://{my_proxy}"
+    # ftp_proxy = f"ftp://{my_proxy}"
     proxies = {
         "http": http_proxy,
-        "https": https_proxy,
-        "ftp": ftp_proxy
+        # "https": https_proxy,
+        # "ftp": ftp_proxy
     }
-    print(proxies)
+    # print(proxies)
     return proxies
     # print(f'Обнаружено бесплатных прокси - {len(free_proxies)}:')
     # for i in range(len(free_proxies)):

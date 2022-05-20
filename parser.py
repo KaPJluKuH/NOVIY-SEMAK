@@ -6,15 +6,16 @@ import stem
 from random import choice
 from proxy import main_proxy
 
+
 def parse_link():
 
     comps = []
     Errors = 0
 
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
-                      'Chrome/95.0.4638.69 Safari/537.36'
-    }
+    # headers = {
+    #     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+    #                   'Chrome/95.0.4638.69 Safari/537.36'
+    # }
     desktop_agents = [
         'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) '
         'Chrome/54.0.2840.99 Safari/537.36',
@@ -64,15 +65,12 @@ def parse_link():
     moskvitch_mod = ['2136', '2137', '2140', '2141', '2142', '2135', '400', '401', '402', '403', '407', '408', '410',
                      '411', '412', '423', '426']
 
-    raf_mod = ['2203']
-
     tagaz_mod = ['aquila', 'vega', 'road_partner', 'c10', 'c190', 'c30', 'tagaz', 'tager']
 
     uaz_mod = ['3151', '3153', '3159', '469', 'buhanka', 'patriot', 'pick-up', 'simbir', 'hunter']
     #
     brands = [{'bogdan': bogdan_mod}, {'doninvest': doninvest_mod}, {'gaz': gaz_mod}, {'zaz': zaz_mod},
-              {'izh': izh_mod}, {'lada': lada_mod}, {'luaz': luaz_mod}, {'moskvitch': moskvitch_mod}, {'raf': raf_mod},
-              {'tagaz': tagaz_mod}, {'uaz': uaz_mod}]
+              {'izh': izh_mod}, {'lada': lada_mod}, {'luaz': luaz_mod}, {'moskvitch': moskvitch_mod}, {'tagaz': tagaz_mod}, {'uaz': uaz_mod}]
 
     for brand in brands:
 
@@ -88,8 +86,9 @@ def parse_link():
                 i += 1
                 print(base_url)
                 # РАБОТА ПАРСЕРА
+                response = requests.get(base_url, headers=random_headers(), timeout=10)
 
-                response = requests.get(base_url, headers=random_headers(), proxies=main_proxy(), timeout=10)
+                # response = requests.get(base_url, headers=random_headers(), proxies=main_proxy(), timeout=10)
 
                 soup = BS(response.content, 'html.parser')
                 models = []
@@ -108,7 +107,9 @@ def parse_link():
                     break
 
                 for url in cars_links:
-                    response = requests.get(url, headers=random_headers(), proxies=main_proxy(), timeout=10) # proxies={'http': '80.48.119.28:8080'}
+                    response = requests.get(url, headers=random_headers(), timeout=10)
+                    # response = requests.get(url, headers=random_headers(), proxies=main_proxy(),
+                    #                         timeout=10)  # proxies={'http': '80.48.119.28:8080'}
                     soup = BS(response.content, 'html.parser')
                     print(url)
 
@@ -118,6 +119,7 @@ def parse_link():
                     car_var_mod = ''
                     car_var_name = ''
                     mark_var = ''
+                    price_var = ''
                     geo_var_c = ''
                     geo_var_o = ''
 
@@ -150,13 +152,20 @@ def parse_link():
                         pose = car_var.find(' ')
                         car_var_mod = car_var[0:pose]
                         car_var_name = car_var[pose+1:]
-                        # PRICE
 
                         pattern = r'оценка модели<\/span>(.*)<\/div><\/div><\/div>'
                         mark_var_pat = re.search(pattern, str(zaglav))
                         if mark_var_pat:
                             mark_var = float(re.search(r'оценка модели<\/span>(.*)<\/div><\/div><\/div>',
                                                        str(zaglav)).group(1))
+
+                        # PRICE
+
+                        price = (soup.find('div', class_='css-10qq2x7 e162wx9x0').get_text(strip=True)).replace('₽', '')
+                        # print('price: ', price)
+                        price_var = int(price.replace(' ', ''))
+                        # print('price_var: ', price_var)
+
                         # GEO
 
                         geo = soup.findAll('div', class_='css-zuhr9c e162wx9x0')
@@ -258,6 +267,7 @@ def parse_link():
                         comps.append({
                             'model': car_var_mod,
                             'name': car_var_name,
+                            'price': price_var,
                             'mark': mark_var,
                             'link': url,
                             'geo_c': geo_var_c,
@@ -278,7 +288,7 @@ def parse_link():
                         })
 
                         print("Page: ", i-1, "\n", "--- Машина: ---", "\n", "->", "Модель - ", car_var_mod, "\n", "->",
-                              "Марка - ", car_var_name, "\n", "->",
+                              "Марка - ", car_var_name, "\n", "->", "Цена - ", price_var, "\n", "->",
                               "Оценка - ", mark_var, "\n", "->", "Город - ", geo_var_c, "\n",  "->", "Область - ",
                               geo_var_o, "\n", "--- Табличка: ---", "\n", "->", "Тип двигателя - ", en_type_var, "\n",
                               "->", "Литраж - ", en_l_var, "\n",  "->", "Мощность - ", en_power_var, "\n",  "->",
@@ -291,21 +301,20 @@ def parse_link():
 
                         if len(comps) == 100:
 
-                            values = [(d['model'], d['name'], d['mark'], d['link'], d['geo_c'], d['geo_r'], d['type_en'],
-                                       d['l_en'], d['power'],
-                                       d['transmission'], d['drive_unit'], d['color'], d['car_mil'], d['steering_wheel'],
-                                       d['generation'],
+                            values = [(d['model'], d['name'], d['price'], d['mark'], d['link'], d['geo_c'], d['geo_r'],
+                                       d['type_en'], d['l_en'], d['power'], d['transmission'], d['drive_unit'],
+                                       d['color'], d['car_mil'], d['steering_wheel'], d['generation'],
                                        d['doc_pts'], d['doc_reg'], d['doc_lim'], d['doc_wanted']) for d in comps]
 
                             columns = (
-                            'model', 'name', 'mark', 'link', 'geo_c', 'geo_r', 'type_en', 'l_en', 'power', 'transmission',
-                            'drive_unit', 'color',
-                            'car_mil', 'steering_wheel', 'generation', 'doc_pts', 'doc_reg', 'doc_lim', 'doc_wanted')
+                                'model', 'name', 'price', 'mark', 'link', 'geo_c', 'geo_r', 'type_en', 'l_en', 'power',
+                                'transmission', 'drive_unit', 'color', 'car_mil', 'steering_wheel', 'generation',
+                                'doc_pts', 'doc_reg', 'doc_lim', 'doc_wanted')
 
                             # Привод данных к заполнению
 
                             for v in values:
-                                context.Insert("cars_in_drom_megatest", columns, v)
+                                context.Insert("cars_in_drom_test", columns, v)
                             comps.clear()
 
     print("Errors = ", Errors)
@@ -315,40 +324,41 @@ def parse_link():
 
 context = DbContext.DbContext("parserDbTest.db")
 
-context.CreateTable("cars_in_drom_megatest", (('model', 'TEXT', ()),
-                                              ('name', 'TEXT', ()),
-                                              ('mark', 'TEXT', ()),
-                                              ('link', 'TEXT', ()),
-                                              ('geo_c', 'TEXT', ()),
-                                              ('geo_r', 'TEXT', ()),
-                                              ('type_en', 'TEXT', ()),
-                                              ('l_en', 'TEXT', ()),
-                                              ('power', 'TEXT', ()),
-                                              ('transmission', 'TEXT', ()),
-                                              ('drive_unit', 'TEXT', ()),
-                                              ('color', 'TEXT', ()),
-                                              ('car_mil', 'TEXT', ()),
-                                              ('steering_wheel', 'TEXT', ()),
-                                              ('generation', 'TEXT', ()),
-                                              ('doc_pts', 'TEXT', ()),
-                                              ('doc_reg', 'TEXT', ()),
-                                              ('doc_lim', 'TEXT', ()),
-                                              ('doc_wanted', 'TEXT', ())))
-context.Truncate("cars_in_drom_megatest")
+context.CreateTable("cars_in_drom_test", (('model', 'TEXT', ()),
+                                          ('name', 'TEXT', ()),
+                                          ('price', 'TEXT', ()),
+                                          ('mark', 'TEXT', ()),
+                                          ('link', 'TEXT', ()),
+                                          ('geo_c', 'TEXT', ()),
+                                          ('geo_r', 'TEXT', ()),
+                                          ('type_en', 'TEXT', ()),
+                                          ('l_en', 'TEXT', ()),
+                                          ('power', 'TEXT', ()),
+                                          ('transmission', 'TEXT', ()),
+                                          ('drive_unit', 'TEXT', ()),
+                                          ('color', 'TEXT', ()),
+                                          ('car_mil', 'TEXT', ()),
+                                          ('steering_wheel', 'TEXT', ()),
+                                          ('generation', 'TEXT', ()),
+                                          ('doc_pts', 'TEXT', ()),
+                                          ('doc_reg', 'TEXT', ()),
+                                          ('doc_lim', 'TEXT', ()),
+                                          ('doc_wanted', 'TEXT', ())))
+context.Truncate("cars_in_drom_test")
 
 data = parse_link()
 
 print(f"{len(data)} read")
 
-values = [(d['model'], d['name'], d['mark'], d['link'], d['geo_c'], d['geo_r'], d['type_en'], d['l_en'], d['power'],
-           d['transmission'], d['drive_unit'], d['color'], d['car_mil'], d['steering_wheel'], d['generation'],
-           d['doc_pts'], d['doc_reg'], d['doc_lim'], d['doc_wanted']) for d in data]
+values = [(d['model'], d['name'], d['price'], d['mark'], d['link'], d['geo_c'], d['geo_r'], d['type_en'], d['l_en'],
+           d['power'], d['transmission'], d['drive_unit'], d['color'], d['car_mil'], d['steering_wheel'],
+           d['generation'], d['doc_pts'], d['doc_reg'], d['doc_lim'], d['doc_wanted']) for d in data]
 
-columns = ('model', 'name', 'mark', 'link', 'geo_c', 'geo_r', 'type_en', 'l_en', 'power', 'transmission', 'drive_unit', 'color',
-           'car_mil', 'steering_wheel', 'generation', 'doc_pts', 'doc_reg', 'doc_lim', 'doc_wanted')
+columns = ('model', 'name', 'price', 'mark', 'link', 'geo_c', 'geo_r', 'type_en', 'l_en', 'power', 'transmission',
+           'drive_unit', 'color', 'car_mil', 'steering_wheel', 'generation', 'doc_pts', 'doc_reg', 'doc_lim', 'doc_wanted')
 
 # Привод данных к заполнению
 for v in values:
-    context.Insert("cars_in_drom_megatest", columns, v)
+    context.Insert("cars_in_drom_test", columns, v)
 
 context.Disconnect()
